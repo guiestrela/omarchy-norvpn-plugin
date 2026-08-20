@@ -28,6 +28,12 @@ Item {
   property string settingsError: ""
   readonly property bool settingsBusy: settingsProcess.running || setSettingProcess.running
 
+  function explainError(text) {
+    var value = String(text || "").replace(/\s+/g, " ").trim()
+    if (/routing is currently used by meshnet/i.test(value))
+      return "Routing cannot be changed while Meshnet is enabled. Disable Meshnet first."
+    return Model.elide(value || "NordVPN setting could not be changed")
+  }
   function setting(name, fallback) {
     var value = settings ? settings[name] : undefined
     return value === undefined || value === null ? fallback : value
@@ -87,11 +93,12 @@ Item {
   }
   Timer {
     id: actionStatusTimer
-    interval: 15000
+    interval: 3000
     repeat: false
     onTriggered: {
       root.actionStatus = ""
       root.settingsError = ""
+      root.lastError = ""
     }
   }
 
@@ -152,7 +159,7 @@ Item {
     onExited: function(exitCode) {
       if (exitCode !== 0) {
         var output = String(setSettingStderr.text || setSettingStdout.text || "")
-        root.settingsError = Model.elide(output || ("NordVPN setting command failed (" + exitCode + ")"))
+        root.settingsError = root.explainError(output || ("NordVPN setting command failed (" + exitCode + ")"))
         root.actionStatus = root.settingsError
         actionStatusTimer.restart()
       }

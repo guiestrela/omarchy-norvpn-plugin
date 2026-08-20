@@ -112,7 +112,7 @@ Panel {
           visible: nord.actionStatus !== "" || nord.lastError !== ""
           width: parent.width
           text: nord.actionStatus !== "" ? nord.actionStatus : nord.lastError
-          color: nord.lastError !== "" && nord.actionStatus === "" ? root.urgent : root.dim
+          color: root.urgent
           font.family: root.fontFamily
           font.pixelSize: Style.font.bodySmall
           wrapMode: Text.WordWrap
