@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.guiestrela.nordvpn",
+  "name": "NordVPN",
+  "version": "1.0.0",
+  "author": "Guiestrela",
+  "license": "MIT",
+  "description": "Connect/disconnect NordVPN and pick a country from the Omarchy bar.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "Panel.qml" },
+  "barWidget": {
+    "displayName": "NordVPN",
+    "description": "Toggle NordVPN and switch countries.",
+    "category": "Network",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": { "refreshIntervalSec": 5 },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Refresh interval (seconds)",
+        "min": 2,
+        "max": 60,
+        "step": 1,
+        "defaultValue": 5
+      }
+    ]
+  }
+}
