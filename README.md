@@ -51,13 +51,12 @@ alert color when the NordVPN daemon is unavailable.
 
 The popup also reads `nordvpn settings` and provides controls for the
 connection technology, firewall, Kill Switch, auto-connect, Threat Protection
-Lite, notifications, tray integration, Meshnet, DNS, LAN discovery, and
-post-quantum VPN. Changes are applied through the official `nordvpn set`
-command.
+Lite, notifications, tray integration, Meshnet, DNS, LAN discovery, routing,
+virtual location, ARP Ignore, and post-quantum VPN. Changes are applied through
+the official `nordvpn set` command.
 
-Routing, User Consent, Virtual Location, and ARP Ignore are displayed as
-read-only daemon status values because the Linux CLI does not expose them as
-portable user settings.
+Firewall Mark and User Consent are displayed as read-only daemon status values.
+The popup explains this distinction next to the two-column settings layout.
 
 - `refreshIntervalSec` (2–60, default 5): connection status refresh interval.
 
