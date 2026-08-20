@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.guiestrela.nordvpn",
   "name": "NordVPN",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Guiestrela",
   "license": "MIT",
   "description": "Connect/disconnect NordVPN and pick a country from the Omarchy bar.",
