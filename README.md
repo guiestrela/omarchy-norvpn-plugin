@@ -27,15 +27,6 @@ not access NordVPN credentials or modify NordVPN configuration files directly.
 omarchy plugin add https://github.com/guiestrela/omarchy-norvpn-plugin.git --enable
 ```
 
-To install manually:
-
-```bash
-git clone https://github.com/guiestrela/omarchy-norvpn-plugin.git \
-  ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
-omarchy plugin validate ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
-omarchy plugin enable io.github.guiestrela.nordvpn right
-```
-
 ## Enable or disable
 
 Enable the plugin in the right bar section:
