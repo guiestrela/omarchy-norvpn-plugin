@@ -17,9 +17,9 @@ searchable country selector.
   nordvpn status
   ```
 
-The plugin only runs `nordvpn status`, `nordvpn countries`, `nordvpn connect`,
-and `nordvpn disconnect`. It does not access NordVPN credentials or modify
-NordVPN configuration files.
+The plugin uses the official NordVPN CLI commands `status`, `settings`,
+`countries`, `connect`, `disconnect`, and the supported `set` options. It does
+not access NordVPN credentials or modify NordVPN configuration files directly.
 
 ## Installation
 
@@ -49,14 +49,26 @@ alert color when the NordVPN daemon is unavailable.
 
 ## Settings
 
-The popup also reads `nordvpn settings` and provides controls for the
-connection technology, firewall, Kill Switch, auto-connect, Threat Protection
-Lite, notifications, tray integration, Meshnet, DNS, LAN discovery, routing,
-virtual location, ARP Ignore, and post-quantum VPN. Changes are applied through
-the official `nordvpn set` command.
+The popup reads `nordvpn settings` and presents supported options in a
+two-column layout. The following settings can be changed through the official
+`nordvpn set` command:
 
-Firewall Mark and User Consent are displayed as read-only daemon status values.
-The popup explains this distinction next to the two-column settings layout.
+- Technology
+- Firewall
+- Kill Switch
+- Auto-connect
+- Threat Protection Lite
+- Notify and Tray
+- Meshnet and DNS
+- LAN Discovery
+- Routing
+- Virtual Location
+- ARP Ignore
+- Post-quantum VPN
+
+`Firewall Mark` and `User Consent` are displayed as read-only daemon status
+values. They must be checked or managed through the NordVPN terminal/CLI when
+supported by the installed client version.
 
 - `refreshIntervalSec` (2–60, default 5): connection status refresh interval.
 
