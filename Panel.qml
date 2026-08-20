@@ -73,21 +73,11 @@ Panel {
         else if (t === "c" || t === "C") nord.toggle()
       }
 
-      Flickable {
-        id: panelFlick
-        anchors.fill: parent
-        contentWidth: width
-        contentHeight: column.implicitHeight
-        clip: true
-        boundsBehavior: Flickable.StopAtBounds
-        flickableDirection: Flickable.VerticalFlick
-        interactive: contentHeight > height
-        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-        Column {
-          id: column
-          width: panelFlick.width
-          spacing: Style.space(12)
+      Column {
+        id: column
+        anchors.left: parent.left
+        anchors.right: parent.right
+        spacing: Style.space(12)
 
         PanelHero {
           id: hero
@@ -226,7 +216,6 @@ Panel {
             wrapMode: Text.WordWrap
           }
         }
-      }
       }
     }
   }
