@@ -33,7 +33,21 @@ To install manually:
 git clone https://github.com/guiestrela/omarchy-norvpn-plugin.git \
   ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
 omarchy plugin validate ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
-omarchy plugin enable io.github.guiestrela.nordvpn --section right
+omarchy plugin enable io.github.guiestrela.nordvpn right
+```
+
+## Enable or disable
+
+Enable the plugin in the right bar section:
+
+```bash
+omarchy plugin enable io.github.guiestrela.nordvpn right
+```
+
+Disable it without removing the installed files:
+
+```bash
+omarchy plugin disable io.github.guiestrela.nordvpn
 ```
 
 ## Usage
@@ -74,11 +88,13 @@ supported by the installed client version.
 
 ## Uninstall
 
+To remove the plugin completely, run:
+
 ```bash
-omarchy plugin disable io.github.guiestrela.nordvpn
-rm -rf ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
-omarchy-shell shell rescanPlugins
+omarchy plugin remove io.github.guiestrela.nordvpn --yes
 ```
+
+This disables the plugin and removes its installed files.
 
 ## License
 
