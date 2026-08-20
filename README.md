@@ -24,13 +24,13 @@ NordVPN configuration files.
 ## Installation
 
 ```bash
-omarchy plugin add https://github.com/guiestrela/omarchy-nordvpn-plugin.git --enable
+omarchy plugin add https://github.com/guiestrela/omarchy-norvpn-plugin.git --enable
 ```
 
 To install manually:
 
 ```bash
-git clone https://github.com/guiestrela/omarchy-nordvpn-plugin.git \
+git clone https://github.com/guiestrela/omarchy-norvpn-plugin.git \
   ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
 omarchy plugin validate ~/.config/omarchy/plugins/io.github.guiestrela.nordvpn
 omarchy plugin enable io.github.guiestrela.nordvpn --section right
