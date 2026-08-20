@@ -24,6 +24,9 @@ Item {
   readonly property int refreshIntervalSec: intSetting("refreshIntervalSec", 5, 2, 60)
   property string _statusOutput: ""
   property string _countriesOutput: ""
+  property var vpnSettings: ({})
+  property string settingsError: ""
+  readonly property bool settingsBusy: settingsProcess.running || setSettingProcess.running
 
   function setting(name, fallback) {
     var value = settings ? settings[name] : undefined
@@ -37,6 +40,7 @@ Item {
   function refresh() {
     if (!statusProcess.running) statusProcess.running = true
     if (!countriesLoaded && !countriesProcess.running) countriesProcess.running = true
+    if (!settingsProcess.running) settingsProcess.running = true
   }
   function toggle() {
     if (controlProcess.running) return
@@ -48,6 +52,13 @@ Item {
     if (!value || setCountryProcess.running) return
     setCountryProcess.command = ["nordvpn", "connect", value]
     setCountryProcess.running = true
+  }
+  function setSetting(name, value) {
+    if (!name || setSettingProcess.running) return
+    var argument = String(value || "")
+    if (name === "lan-discovery") argument = argument === "on" ? "enable" : "disable"
+    setSettingProcess.command = ["nordvpn", "set", name, argument]
+    setSettingProcess.running = true
   }
 
   Timer {
@@ -108,6 +119,33 @@ Item {
         root.countries = Model.parseCountries(countriesStdout.text || root._countriesOutput || "")
         root.countriesLoaded = root.countries.length > 0
       }
+    }
+  }
+  Process {
+    id: settingsProcess
+    command: ["nordvpn", "settings"]
+    stdout: StdioCollector { id: settingsStdout; waitForEnd: true }
+    onExited: function(exitCode) {
+      if (exitCode === 0) {
+        root.vpnSettings = Model.parseSettings(settingsStdout.text || "")
+        root.settingsError = ""
+      } else {
+        root.settingsError = "NordVPN settings unavailable"
+      }
+    }
+  }
+  Process {
+    id: setSettingProcess
+    command: []
+    stdout: StdioCollector { waitForEnd: true }
+    stderr: StdioCollector { id: setSettingStderr; waitForEnd: true }
+    onExited: function(exitCode) {
+      if (exitCode !== 0) {
+        root.settingsError = Model.elide(setSettingStderr.text || "Could not change NordVPN setting")
+        root.actionStatus = root.settingsError
+        actionStatusTimer.restart()
+      }
+      root.refresh()
     }
   }
   Process {

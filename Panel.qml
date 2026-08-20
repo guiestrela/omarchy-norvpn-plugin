@@ -133,6 +133,88 @@ Panel {
             onChanged: function(v) { nord.setCountry(v) }
           }
         }
+
+        PanelSeparator { foreground: root.foreground }
+        Column {
+          width: parent.width
+          spacing: Style.space(8)
+          PanelSectionHeader { text: "SETTINGS"; foreground: root.foreground; fontFamily: root.fontFamily }
+
+          SearchableDropdown {
+            width: parent.width
+            showLabel: true
+            label: "Technology"
+            placeholderText: "Select technology..."
+            fontFamily: root.fontFamily
+            options: [
+              { value: "NORDLYNX", label: "NordLynx" },
+              { value: "OPENVPN", label: "OpenVPN" }
+            ]
+            value: nord.vpnSettings["technology"] || ""
+            onChanged: function(v) { nord.setSetting("technology", v) }
+          }
+
+          Repeater {
+            model: [
+              { key: "firewall", label: "Firewall", command: "firewall" },
+              { key: "kill-switch", label: "Kill Switch", command: "killswitch" },
+              { key: "auto-connect", label: "Auto-connect", command: "autoconnect" },
+              { key: "threat-protection-lite", label: "Threat Protection Lite", command: "threatprotectionlite" },
+              { key: "notify", label: "Notify", command: "notify" },
+              { key: "tray", label: "Tray", command: "tray" },
+              { key: "meshnet", label: "Meshnet", command: "meshnet" },
+              { key: "dns", label: "DNS", command: "dns" },
+              { key: "lan-discovery", label: "LAN Discovery", command: "lan-discovery" },
+              { key: "post-quantum-vpn", label: "Post-quantum VPN", command: "pq" }
+            ]
+            delegate: Row {
+              width: parent.width
+              spacing: Style.space(8)
+              Text {
+                width: parent.width - settingSwitch.width - Style.space(8)
+                text: modelData.label + ": " + (nord.vpnSettings[modelData.key] || "Checking…")
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.body
+                verticalAlignment: Text.AlignVCenter
+              }
+              ToggleSwitch {
+                id: settingSwitch
+                checked: Model.settingEnabled(nord.vpnSettings[modelData.key])
+                busy: nord.settingsBusy
+                interactive: !nord.unavailable
+                foreground: root.foreground
+                onToggled: nord.setSetting(modelData.command, checked ? "on" : "off")
+              }
+            }
+          }
+
+          Text {
+            visible: nord.settingsError !== ""
+            width: parent.width
+            text: nord.settingsError
+            color: root.urgent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.bodySmall
+            wrapMode: Text.WordWrap
+          }
+          Text {
+            width: parent.width
+            text: "Routing: " + (nord.vpnSettings["routing"] || "Checking…") + "  |  User Consent: " + (nord.vpnSettings["user-consent"] || "Checking…")
+            color: root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.bodySmall
+            wrapMode: Text.WordWrap
+          }
+          Text {
+            width: parent.width
+            text: "Virtual Location: " + (nord.vpnSettings["virtual-location"] || "Checking…") + "  |  ARP Ignore: " + (nord.vpnSettings["arp-ignore"] || "Checking…")
+            color: root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.bodySmall
+            wrapMode: Text.WordWrap
+          }
+        }
       }
     }
   }

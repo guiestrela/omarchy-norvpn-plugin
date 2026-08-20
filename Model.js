@@ -35,6 +35,22 @@ function parseStatus(raw) {
   return { state: state, country: field("Country"), server: field("Server") }
 }
 
+function parseSettings(raw) {
+  var values = {}
+  var lines = String(raw || "").split("\n")
+  for (var i = 0; i < lines.length; i++) {
+    var match = lines[i].match(/^\s*([^:]+):\s*(.*?)\s*$/)
+    if (!match) continue
+    var key = match[1].trim().toLowerCase().replace(/\s+/g, "-")
+    values[key] = match[2].trim()
+  }
+  return values
+}
+
+function settingEnabled(value) {
+  return /^(enabled|on|yes|true)$/i.test(String(value || "").trim())
+}
+
 function statusText(state) {
   switch (String(state || "")) {
     case "Connected": return "Connected"
