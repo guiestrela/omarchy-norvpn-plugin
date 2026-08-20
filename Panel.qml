@@ -24,6 +24,7 @@ Panel {
 
   onOpenedChanged: if (opened) {
     nord.refresh()
+    nord.refreshSettings()
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
 
@@ -197,7 +198,7 @@ Panel {
                   busy: nord.settingsBusy
                   interactive: !nord.unavailable
                   foreground: root.foreground
-                  onToggled: nord.setSetting(modelData.command, checked ? "on" : "off")
+                  onToggled: nord.setSetting(modelData.command, checked ? "off" : "on")
                 }
               }
             }
@@ -213,15 +214,6 @@ Panel {
             }
           }
 
-          Text {
-            visible: nord.settingsError !== ""
-            width: parent.width
-            text: nord.settingsError
-            color: root.urgent
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.bodySmall
-            wrapMode: Text.WordWrap
-          }
           PanelSeparator { foreground: root.foreground }
           Text {
             width: parent.width

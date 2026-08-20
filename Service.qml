@@ -40,6 +40,8 @@ Item {
   function refresh() {
     if (!statusProcess.running) statusProcess.running = true
     if (!countriesLoaded && !countriesProcess.running) countriesProcess.running = true
+  }
+  function refreshSettings() {
     if (!settingsProcess.running) settingsProcess.running = true
   }
   function toggle() {
@@ -56,7 +58,10 @@ Item {
   function setSetting(name, value) {
     if (!name || setSettingProcess.running) return
     var argument = String(value || "")
+    if (name === "pq") name = "post-quantum"
     if (name === "lan-discovery") argument = argument === "on" ? "enable" : "disable"
+    else if (argument === "on") argument = "enabled"
+    else if (argument === "off") argument = "disabled"
     setSettingProcess.command = ["nordvpn", "set", name, argument]
     setSettingProcess.running = true
   }
@@ -82,9 +87,12 @@ Item {
   }
   Timer {
     id: actionStatusTimer
-    interval: 2200
+    interval: 15000
     repeat: false
-    onTriggered: root.actionStatus = ""
+    onTriggered: {
+      root.actionStatus = ""
+      root.settingsError = ""
+    }
   }
 
   Process {
@@ -131,21 +139,24 @@ Item {
         root.settingsError = ""
       } else {
         root.settingsError = "NordVPN settings unavailable"
+        root.actionStatus = root.settingsError
+        actionStatusTimer.restart()
       }
     }
   }
   Process {
     id: setSettingProcess
     command: []
-    stdout: StdioCollector { waitForEnd: true }
+    stdout: StdioCollector { id: setSettingStdout; waitForEnd: true }
     stderr: StdioCollector { id: setSettingStderr; waitForEnd: true }
     onExited: function(exitCode) {
       if (exitCode !== 0) {
-        root.settingsError = Model.elide(setSettingStderr.text || "Could not change NordVPN setting")
+        var output = String(setSettingStderr.text || setSettingStdout.text || "")
+        root.settingsError = Model.elide(output || ("NordVPN setting command failed (" + exitCode + ")"))
         root.actionStatus = root.settingsError
         actionStatusTimer.restart()
       }
-      root.refresh()
+      root.refreshSettings()
     }
   }
   Process {
