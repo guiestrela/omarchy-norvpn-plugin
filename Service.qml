@@ -17,7 +17,7 @@ Item {
   readonly property bool transitioning: connectionState === "Connecting" || connectionState === "Reconnecting" || connectionState === "Disconnecting"
   readonly property bool unavailable: connectionState === "Unavailable"
   readonly property bool active: _desired === -1 ? connected : (_desired === 1)
-  readonly property bool busy: statusProcess.running || countriesProcess.running || controlProcess.running || setCountryProcess.running
+  readonly property bool busy: statusProcess.running || countriesProcess.running || controlProcess.running || setCountryProcess.running || pauseProcess.running
   readonly property string statusText: Model.statusText(connectionState)
   property string actionStatus: ""
   property string lastError: ""
@@ -26,6 +26,9 @@ Item {
   property string _countriesOutput: ""
   property var vpnSettings: ({})
   property string settingsError: ""
+  property int pauseRemainingSec: 0
+  property string _pauseDuration: ""
+  readonly property string pauseCountdownText: pauseRemainingSec > 0 ? formatPauseTime(pauseRemainingSec) : "Ready"
   readonly property bool settingsBusy: settingsProcess.running || setSettingProcess.running
 
   function explainError(text) {
@@ -55,6 +58,26 @@ Item {
     _desired = (connected || transitioning) ? 0 : 1
     controlProcess.command = _desired === 1 ? ["nordvpn", "connect"] : ["nordvpn", "disconnect"]
     controlProcess.running = true
+  }
+  function formatPauseTime(seconds) {
+    var total = Math.max(0, parseInt(seconds, 10) || 0)
+    var minutes = Math.floor(total / 60)
+    var secs = total % 60
+    return minutes + ":" + (secs < 10 ? "0" : "") + secs
+  }
+  function durationSeconds(duration) {
+    var values = { "5m": 300, "15m": 900, "30m": 1800, "1h": 3600, "24h": 86400 }
+    return values[String(duration || "")] || 0
+  }
+  function clearPauseCountdown() {
+    pauseRemainingSec = 0
+    _pauseDuration = ""
+  }
+  function pause(duration) {
+    if (!duration || pauseProcess.running) return
+    _pauseDuration = duration
+    pauseProcess.command = ["nordvpn", "pause", duration]
+    pauseProcess.running = true
   }
   function setCountry(value) {
     if (!value || setCountryProcess.running) return
@@ -91,6 +114,16 @@ Item {
       if (ticks >= 6) { ticks = 0; running = false; root._desired = -1 }
     }
   }
+  Timer {
+    id: pauseTimer
+    interval: 1000
+    repeat: true
+    running: root.pauseRemainingSec > 0
+    onTriggered: {
+      if (root.pauseRemainingSec > 0) root.pauseRemainingSec -= 1
+    }
+  }
+
   Timer {
     id: actionStatusTimer
     interval: 3000
@@ -133,6 +166,24 @@ Item {
       if (exitCode === 0) {
         root.countries = Model.parseCountries(countriesStdout.text || root._countriesOutput || "")
         root.countriesLoaded = root.countries.length > 0
+      }
+    }
+  }
+  Process {
+    id: pauseProcess
+    command: []
+    stdout: StdioCollector { id: pauseStdout; waitForEnd: true }
+    stderr: StdioCollector { id: pauseStderr; waitForEnd: true }
+    onExited: function(exitCode) {
+      if (exitCode !== 0) {
+        var output = String(pauseStderr.text || pauseStdout.text || "")
+        root.lastError = Model.elide(output || "Could not pause NordVPN")
+        root.actionStatus = root.lastError
+        actionStatusTimer.restart()
+      } else {
+        root.pauseRemainingSec = root.durationSeconds(root._pauseDuration)
+        root.actionStatus = "NordVPN paused"
+        actionStatusTimer.restart()
       }
     }
   }

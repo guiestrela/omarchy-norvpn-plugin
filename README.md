@@ -57,6 +57,7 @@ omarchy plugin disable io.github.guiestrela.nordvpn
 - Middle-click: connect or disconnect.
 - In the popup, the switch performs a quick connect or disconnect.
 - The country selector searches countries and runs `nordvpn connect <country>`.
+- The Pause selector pauses the VPN immediately when you choose 5m, 15m, 30m, 1h, or 24h using `nordvpn pause`. A countdown is shown beside the selector, which then returns to its placeholder.
 
 The icon is bright when connected, dimmed when disconnected, and shown in the
 alert color when the NordVPN daemon is unavailable.

@@ -17,6 +17,7 @@ Panel {
   readonly property color iconColor: nord.unavailable ? urgent : (nord.active ? foreground : dim)
   readonly property color barIconColor: nord.unavailable ? Qt.darker(barForeground, 1.2) : (nord.active ? barForeground : Qt.darker(barForeground, 1.55))
   readonly property string toggleHint: nord.active ? "Disconnect" : "Connect"
+  readonly property bool paused: nord.pauseRemainingSec > 0
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
@@ -26,6 +27,16 @@ Panel {
     nord.refresh()
     nord.refreshSettings()
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
+  }
+
+  Connections {
+    target: nord
+    function onConnectionStateChanged() {
+      if (nord.connected) {
+        pausePicker.value = ""
+        nord.clearPauseCountdown()
+      }
+    }
   }
 
   IpcHandler {
@@ -45,7 +56,9 @@ Panel {
     bar: root.bar
     text: "󰦝"
     foreground: root.barIconColor
-    tooltipText: "NordVPN — " + nord.statusText
+    tooltipText: root.paused
+      ? "NordVPN " + String.fromCodePoint(0x2014) + " Paused (" + nord.pauseCountdownText + ")"
+      : "NordVPN " + String.fromCodePoint(0x2014) + " " + nord.statusText
     onPressed: function(buttonCode) {
       if (buttonCode === Qt.RightButton) nord.refresh()
       else if (buttonCode === Qt.MiddleButton) nord.toggle()
@@ -66,7 +79,7 @@ Panel {
     PanelKeyCatcher {
       id: keyCatcher
       anchors.fill: parent
-      blocked: countryPicker.popupOpen || technologyPicker.popupOpen
+      blocked: countryPicker.popupOpen || pausePicker.popupOpen || technologyPicker.popupOpen
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onTextKey: function(t) {
@@ -132,6 +145,45 @@ Panel {
             options: nord.countries
             value: nord.country
             onChanged: function(v) { nord.setCountry(v) }
+          }
+        }
+
+        PanelSeparator { foreground: root.foreground }
+        Column {
+          width: parent.width
+          spacing: Style.space(8)
+          PanelSectionHeader { text: "PAUSE"; foreground: root.foreground; fontFamily: root.fontFamily }
+          Row {
+            width: parent.width
+            spacing: Style.space(10)
+            SearchableDropdown {
+              id: pausePicker
+              width: Style.space(220)
+            showLabel: false
+            placeholderText: "Choose pause duration..."
+            fontFamily: root.fontFamily
+            options: [
+              { value: "5m", label: "5 minutes" },
+              { value: "15m", label: "15 minutes" },
+              { value: "30m", label: "30 minutes" },
+              { value: "1h", label: "1 hour" },
+              { value: "24h", label: "24 hours" }
+            ]
+              onChanged: function(v) {
+                nord.pause(v)
+                pausePicker.value = ""
+              }
+            }
+            Text {
+              width: parent.width - pausePicker.width - Style.space(10)
+              height: pausePicker.implicitHeight
+              text: nord.pauseCountdownText
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              horizontalAlignment: Text.AlignHCenter
+              verticalAlignment: Text.AlignVCenter
+            }
           }
         }
 
