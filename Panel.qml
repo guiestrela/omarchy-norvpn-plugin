@@ -66,6 +66,17 @@ Panel {
     }
   }
 
+  Timer {
+    id: pauseTooltipTimer
+    interval: 1000
+    repeat: true
+    running: root.paused && button.tooltipHovered
+    onTriggered: {
+      if (root.bar && button.tooltipHovered)
+        root.bar.tooltipText = button.tooltipText
+    }
+  }
+
   KeyboardPanel {
     id: panel
     anchorItem: button
