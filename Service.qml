@@ -61,9 +61,18 @@ Item {
   }
   function announce(headline, description) {
     if (!headline || !root._settingsInitialized || Model.settingEnabled(root.vpnSettings["tray"])) return
-    var args = ["omarchy-notification-send", "-g", "󰦝", headline]
-    if (description) args.push(description)
-    Quickshell.execDetached(args)
+    var script = [
+      'state="${XDG_RUNTIME_DIR:-/tmp}/omarchy-nordvpn-notification.state"',
+      'lock="$state.lock"',
+      'exec 9>"$lock"',
+      'flock 9',
+      'now=$(date +%s)',
+      'key=$(printf "%s" "$1|$2" | sha256sum | cut -d" " -f1)',
+      'if read previousKey previousTime < "$state" 2>/dev/null && [ "$previousKey" = "$key" ] && [ $((now - previousTime)) -lt 10 ]; then exit 0; fi',
+      'printf "%s %s\\n" "$key" "$now" > "$state"',
+      'omarchy-notification-send -g "󰦝" "$1" "$2"'
+    ].join("; ")
+    Quickshell.execDetached(["bash", "-c", script, "nordvpn-notification", headline, description || ""])
   }
   function announceStatusChange(parsed) {
     var state = String(parsed.state || "")
@@ -140,6 +149,7 @@ Item {
     if (name === "lan-discovery") argument = argument === "on" ? "enable" : "disable"
     else if (argument === "on") argument = "enabled"
     else if (argument === "off") argument = "disabled"
+    if (name === "tray") vpnSettings["tray"] = argument
     setSettingProcess.command = ["nordvpn", "set", name, argument]
     setSettingProcess.running = true
   }
