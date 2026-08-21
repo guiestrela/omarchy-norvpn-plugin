@@ -59,8 +59,8 @@ Item {
   function refreshSettings() {
     if (!settingsProcess.running) settingsProcess.running = true
   }
-  function announce(headline, description) {
-    if (!headline || !root._settingsInitialized || Model.settingEnabled(root.vpnSettings["tray"])) return
+  function announce(headline, description, allowWithTray) {
+    if (!headline || !root._settingsInitialized || (Model.settingEnabled(root.vpnSettings["tray"]) && !allowWithTray)) return
     var script = [
       'state="${XDG_RUNTIME_DIR:-/tmp}/omarchy-nordvpn-notification.state"',
       'lock="$state.lock"',
@@ -102,7 +102,7 @@ Item {
       if (root._suppressNextStatusAnnouncement) {
         root._suppressNextStatusAnnouncement = false
       } else {
-        root.announce("NordVPN server changed", changedTarget ? "Connected to " + changedTarget : "Connected server updated")
+        root.announce("NordVPN server changed", changedTarget ? "Connected to " + changedTarget : "Connected server updated", true)
       }
     }
     root._lastAnnouncedState = state
