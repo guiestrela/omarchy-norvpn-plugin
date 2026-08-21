@@ -25,6 +25,8 @@ Item {
   property string _statusOutput: ""
   property string _countriesOutput: ""
   property bool _statusInitialized: false
+  property bool _suppressNextStatusAnnouncement: false
+  property bool _settingsInitialized: false
   property string _lastAnnouncedState: ""
   property string _lastAnnouncedCountry: ""
   property string _lastAnnouncedServer: ""
@@ -58,7 +60,7 @@ Item {
     if (!settingsProcess.running) settingsProcess.running = true
   }
   function announce(headline, description) {
-    if (!headline) return
+    if (!headline || !root._settingsInitialized || Model.settingEnabled(root.vpnSettings["tray"])) return
     var args = ["omarchy-notification-send", "-g", "󰦝", headline]
     if (description) args.push(description)
     Quickshell.execDetached(args)
@@ -75,7 +77,10 @@ Item {
       return
     }
     if (state !== root._lastAnnouncedState) {
-      if (state === "Connected") {
+      var suppress = root._suppressNextStatusAnnouncement && (state === "Connected" || state === "Disconnected")
+      if (suppress) {
+        root._suppressNextStatusAnnouncement = false
+      } else if (state === "Connected") {
         var target = country || server
         root.announce("NordVPN connected", target ? "Connected to " + target : "VPN connection is active")
       } else if (state === "Disconnected") {
@@ -85,7 +90,11 @@ Item {
       }
     } else if (state === "Connected" && (country !== root._lastAnnouncedCountry || server !== root._lastAnnouncedServer)) {
       var changedTarget = country || server
-      root.announce("NordVPN server changed", changedTarget ? "Connected to " + changedTarget : "Connected server updated")
+      if (root._suppressNextStatusAnnouncement) {
+        root._suppressNextStatusAnnouncement = false
+      } else {
+        root.announce("NordVPN server changed", changedTarget ? "Connected to " + changedTarget : "Connected server updated")
+      }
     }
     root._lastAnnouncedState = state
     root._lastAnnouncedCountry = country
@@ -94,6 +103,7 @@ Item {
   function toggle() {
     if (controlProcess.running) return
     _desired = (connected || transitioning) ? 0 : 1
+    _suppressNextStatusAnnouncement = true
     controlProcess.command = _desired === 1 ? ["nordvpn", "connect"] : ["nordvpn", "disconnect"]
     controlProcess.running = true
   }
@@ -119,6 +129,7 @@ Item {
   }
   function setCountry(value) {
     if (!value || setCountryProcess.running) return
+    _suppressNextStatusAnnouncement = true
     setCountryProcess.command = ["nordvpn", "connect", value]
     setCountryProcess.running = true
   }
@@ -140,6 +151,8 @@ Item {
     triggeredOnStart: true
     onTriggered: root.refresh()
   }
+
+  Component.onCompleted: root.refreshSettings()
   Timer {
     id: settleTimer
     property int ticks: 0
@@ -238,8 +251,10 @@ Item {
       if (exitCode === 0) {
         root.vpnSettings = Model.parseSettings(settingsStdout.text || "")
         root.settingsError = ""
+        root._settingsInitialized = true
       } else {
         root.settingsError = "NordVPN settings unavailable"
+        root._settingsInitialized = false
         root.actionStatus = root.settingsError
         actionStatusTimer.restart()
       }
@@ -272,6 +287,7 @@ Item {
       var stdout = String(controlStdout.text || "")
       var stderr = String(controlStderr.text || "")
       if (exitCode !== 0) {
+        root._suppressNextStatusAnnouncement = false
         root._desired = -1
         root.lastError = Model.elide(stderr || stdout || "NordVPN command failed")
         root.actionStatus = root.lastError
@@ -288,6 +304,7 @@ Item {
     stderr: StdioCollector { id: setCountryStderr; waitForEnd: true }
     onExited: function(exitCode) {
       if (exitCode !== 0) {
+        root._suppressNextStatusAnnouncement = false
         root.lastError = Model.elide(setCountryStderr.text || "Could not change NordVPN country")
         root.actionStatus = root.lastError
         actionStatusTimer.restart()
