@@ -24,6 +24,10 @@ Item {
   readonly property int refreshIntervalSec: intSetting("refreshIntervalSec", 5, 2, 60)
   property string _statusOutput: ""
   property string _countriesOutput: ""
+  property bool _statusInitialized: false
+  property string _lastAnnouncedState: ""
+  property string _lastAnnouncedCountry: ""
+  property string _lastAnnouncedServer: ""
   property var vpnSettings: ({})
   property string settingsError: ""
   property int pauseRemainingSec: 0
@@ -52,6 +56,40 @@ Item {
   }
   function refreshSettings() {
     if (!settingsProcess.running) settingsProcess.running = true
+  }
+  function announce(headline, description) {
+    if (!headline) return
+    var args = ["omarchy-notification-send", "-g", "󰦝", headline]
+    if (description) args.push(description)
+    Quickshell.execDetached(args)
+  }
+  function announceStatusChange(parsed) {
+    var state = String(parsed.state || "")
+    var country = String(parsed.country || "")
+    var server = String(parsed.server || "")
+    if (!root._statusInitialized) {
+      root._statusInitialized = true
+      root._lastAnnouncedState = state
+      root._lastAnnouncedCountry = country
+      root._lastAnnouncedServer = server
+      return
+    }
+    if (state !== root._lastAnnouncedState) {
+      if (state === "Connected") {
+        var target = country || server
+        root.announce("NordVPN connected", target ? "Connected to " + target : "VPN connection is active")
+      } else if (state === "Disconnected") {
+        root.announce("NordVPN disconnected", "VPN connection is inactive")
+      } else if (state === "Unavailable") {
+        root.announce("NordVPN unavailable", "The NordVPN daemon could not be reached")
+      }
+    } else if (state === "Connected" && (country !== root._lastAnnouncedCountry || server !== root._lastAnnouncedServer)) {
+      var changedTarget = country || server
+      root.announce("NordVPN server changed", changedTarget ? "Connected to " + changedTarget : "Connected server updated")
+    }
+    root._lastAnnouncedState = state
+    root._lastAnnouncedCountry = country
+    root._lastAnnouncedServer = server
   }
   function toggle() {
     if (controlProcess.running) return
@@ -147,11 +185,15 @@ Item {
       var output = String(statusStdout.text || root._statusOutput || "").trim()
       if (exitCode === 0 && output !== "") {
         var parsed = Model.parseStatus(output)
+        root.announceStatusChange(parsed)
         root.connectionState = parsed.state
         root.country = parsed.country
         root.server = parsed.server
         if (root._desired !== -1 && root.connected === (root._desired === 1)) root._desired = -1
-      } else root.connectionState = "Unavailable"
+      } else {
+        root.announceStatusChange({ state: "Unavailable", country: "", server: "" })
+        root.connectionState = "Unavailable"
+      }
     }
   }
   Process {
@@ -183,6 +225,7 @@ Item {
       } else {
         root.pauseRemainingSec = root.durationSeconds(root._pauseDuration)
         root.actionStatus = "NordVPN paused"
+        root.announce("NordVPN paused", "The VPN will resume when the pause expires")
         actionStatusTimer.restart()
       }
     }
@@ -213,6 +256,9 @@ Item {
         root.settingsError = root.explainError(output || ("NordVPN setting command failed (" + exitCode + ")"))
         root.actionStatus = root.settingsError
         actionStatusTimer.restart()
+      } else {
+        var settingCommand = setSettingProcess.command || []
+        root.announce("NordVPN setting changed", settingCommand.length >= 4 ? settingCommand[2] + " → " + settingCommand[3] : "The setting was updated")
       }
       root.refreshSettings()
     }
