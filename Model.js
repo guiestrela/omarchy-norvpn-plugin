@@ -51,6 +51,29 @@ function settingEnabled(value) {
   return /^(enabled|on|yes|true)$/i.test(String(value || "").trim())
 }
 
+function autoConnectTarget(value) {
+  var target = String(value || "").trim()
+  if (/^[a-z]{2}(?:[0-9]+)?$/i.test(target)) return target.toLowerCase()
+  var codes = {
+    "argentina": "ar", "australia": "au", "austria": "at", "belgium": "be",
+    "brazil": "br", "bulgaria": "bg", "canada": "ca", "chile": "cl",
+    "colombia": "co", "costa rica": "cr", "croatia": "hr", "cyprus": "cy",
+    "czech republic": "cz", "denmark": "dk", "estonia": "ee", "finland": "fi",
+    "france": "fr", "georgia": "ge", "germany": "de", "greece": "gr",
+    "hong kong": "hk", "hungary": "hu", "iceland": "is", "india": "in",
+    "indonesia": "id", "ireland": "ie", "israel": "il", "italy": "it",
+    "japan": "jp", "latvia": "lv", "luxembourg": "lu", "malaysia": "my",
+    "mexico": "mx", "moldova": "md", "netherlands": "nl", "new zealand": "nz",
+    "nigeria": "ng", "norway": "no", "poland": "pl", "portugal": "pt",
+    "romania": "ro", "serbia": "rs", "singapore": "sg", "slovakia": "sk",
+    "slovenia": "si", "south africa": "za", "south korea": "kr", "spain": "es",
+    "sweden": "se", "switzerland": "ch", "taiwan": "tw", "thailand": "th",
+    "turkey": "tr", "ukraine": "ua", "united arab emirates": "ae",
+    "united kingdom": "uk", "united states": "us", "vietnam": "vn"
+  }
+  return codes[target.toLowerCase()] || target
+}
+
 function statusText(state) {
   switch (String(state || "")) {
     case "Connected": return "Connected"

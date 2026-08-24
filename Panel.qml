@@ -90,7 +90,7 @@ Panel {
     PanelKeyCatcher {
       id: keyCatcher
       anchors.fill: parent
-      blocked: countryPicker.popupOpen || pausePicker.popupOpen || technologyPicker.popupOpen
+    blocked: countryPicker.popupOpen || pausePicker.popupOpen || technologyPicker.popupOpen
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onTextKey: function(t) {
@@ -218,32 +218,6 @@ Panel {
             onChanged: function(v) { nord.setSetting("technology", v) }
           }
 
-          TextField {
-            id: autoConnectCountryField
-            width: parent.width
-            foreground: root.foreground
-            font.family: root.fontFamily
-            placeholderText: "Country code (optional, e.g. br or fr)"
-            text: nord.autoConnectCountry
-            function commitCountry() {
-              var value = text.trim().toLowerCase()
-              if (/^[a-z]{2}(?:[0-9]+)?$/.test(value) || value === "")
-                nord.autoConnectCountry = value
-              else
-                text = nord.autoConnectCountry
-            }
-            onAccepted: commitCountry()
-            onEditingFinished: commitCountry()
-          }
-          Text {
-            width: parent.width
-            text: "Auto-connect uses this country code when enabled. Leave empty for the fastest server."
-            color: root.dim
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.caption
-            wrapMode: Text.WordWrap
-          }
-
           Item {
             width: parent.width
             implicitHeight: settingsFlow.implicitHeight
@@ -268,8 +242,11 @@ Panel {
               { key: "arp-ignore", label: "ARP Ignore", command: "arp-ignore" },
               { key: "post-quantum-vpn", label: "Post-quantum VPN", command: "pq" }
             ]
-              delegate: Row {
-                width: (settingsFlow.width - Style.space(8)) / 2
+            delegate: Column {
+              width: (settingsFlow.width - Style.space(8)) / 2
+              spacing: Style.space(8)
+              Row {
+                width: parent.width
                 spacing: Style.space(8)
                 Text {
                   width: parent.width - settingSwitch.width - Style.space(8)
@@ -288,6 +265,21 @@ Panel {
                   interactive: !nord.unavailable
                   foreground: root.foreground
                   onToggled: nord.setSetting(modelData.command, checked ? "off" : "on")
+                }
+              }
+              SearchableDropdown {
+                id: autoConnectCountryPicker
+                visible: modelData.key === "auto-connect"
+                width: parent.width
+                showLabel: false
+                placeholderText: "Auto-connect country (optional)..."
+                fontFamily: root.fontFamily
+                options: nord.countries
+                value: nord.autoConnectCountry
+                onChanged: function(v) {
+                  nord.autoConnectCountry = v
+                  if (Model.settingEnabled(nord.vpnSettings["auto-connect"]))
+                    nord.setSetting("autoconnect", "on")
                 }
               }
             }

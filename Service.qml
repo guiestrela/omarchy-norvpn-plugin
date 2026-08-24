@@ -153,7 +153,7 @@ Item {
     if (name === "tray") vpnSettings["tray"] = argument
     setSettingProcess.command = ["nordvpn", "set", name, argument]
     if (name === "autoconnect" && argument === "enabled" && root.autoConnectCountry !== "")
-      setSettingProcess.command.push(root.autoConnectCountry)
+      setSettingProcess.command.push(Model.autoConnectTarget(root.autoConnectCountry))
     setSettingProcess.running = true
   }
 
