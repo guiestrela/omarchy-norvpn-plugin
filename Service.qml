@@ -67,14 +67,25 @@ Item {
   function announce(headline, description, allowWithTray) {
     if (!headline || !root._settingsInitialized || (Model.settingEnabled(root.vpnSettings["tray"]) && !allowWithTray)) return
     var script = [
-      'state="${XDG_RUNTIME_DIR:-/tmp}/omarchy-nordvpn-notification.state"',
-      'lock="$state.lock"',
-      'exec 9>"$lock"',
-      'flock 9',
+      'runtime="${XDG_RUNTIME_DIR:-}"',
+      '[ -n "$runtime" ] && [ -d "$runtime" ] || exit 0',
+      'base="$runtime/omarchy-nordvpn-notification"',
+      'mkdir "$base" 2>/dev/null || [ -d "$base" ] || exit 0',
+      'lock="$base.lockdir"',
+      'mkdir "$lock" 2>/dev/null || exit 0',
+      'trap '\''rmdir -- "$lock" 2>/dev/null'\'' EXIT',
+      'state="$base.state"',
       'now=$(date +%s)',
       'key=$(printf "%s" "$1|$2" | sha256sum | cut -d" " -f1)',
-      'if read previousKey previousTime < "$state" 2>/dev/null && [ "$previousKey" = "$key" ] && [ $((now - previousTime)) -lt 10 ]; then exit 0; fi',
-      'printf "%s %s\\n" "$key" "$now" > "$state"',
+      'previous=$(cat -- "$state" 2>/dev/null) || previous=""',
+      'previousKey=${previous%% *}',
+      'previousTime=${previous#* }',
+      'case "$previousTime" in ""|*[!0-9]*) previousTime=-1;; esac',
+      'if [ "$previousKey" = "$key" ] && [ $((now - previousTime)) -lt 10 ]; then exit 0; fi',
+      'tmp=$(mktemp "$base.state.XXXXXX") || exit 0',
+      'trap '\''rm -f -- "$tmp"; rmdir -- "$lock" 2>/dev/null'\'' EXIT',
+      'printf "%s %s\\n" "$key" "$now" > "$tmp" || exit 0',
+      'mv -f -- "$tmp" "$state" || exit 0',
       'omarchy-notification-send -g "󰦝" "$1" "$2"'
     ].join("; ")
     Quickshell.execDetached(["bash", "-c", script, "nordvpn-notification", headline, description || ""])
