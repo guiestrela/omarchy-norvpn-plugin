@@ -90,7 +90,7 @@ Panel {
     PanelKeyCatcher {
       id: keyCatcher
       anchors.fill: parent
-    blocked: countryPicker.popupOpen || pausePicker.popupOpen || technologyPicker.popupOpen
+      blocked: countryPicker.popupOpen || pausePicker.popupOpen || technologyPicker.popupOpen
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onTextKey: function(t) {
@@ -98,10 +98,20 @@ Panel {
         else if (t === "c" || t === "C") nord.toggle()
       }
 
-      Column {
+      Flickable {
+        id: panelScroll
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: column.implicitHeight
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: Flickable.VerticalFlick
+        interactive: contentHeight > height
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+        Column {
         id: column
-        anchors.left: parent.left
-        anchors.right: parent.right
+        width: panelScroll.width
         spacing: Style.space(12)
 
         PanelHero {
@@ -357,6 +367,7 @@ Panel {
             font.pixelSize: Style.font.bodySmall
             wrapMode: Text.WordWrap
           }
+        }
         }
       }
     }
