@@ -218,6 +218,58 @@ Panel {
             onChanged: function(v) { nord.setSetting("technology", v) }
           }
 
+          PanelSeparator { foreground: root.foreground }
+          Column {
+            width: parent.width
+            spacing: Style.space(8)
+            PanelSectionHeader { text: "AUTO-CONNECT"; foreground: root.foreground; fontFamily: root.fontFamily }
+            Row {
+              width: parent.width
+              spacing: Style.space(8)
+              Text {
+                width: parent.width - autoConnectSwitch.width - Style.space(8)
+                text: "Auto-connect: " + (nord.vpnSettings["auto-connect"] || "Checking…")
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
+              }
+              ToggleSwitch {
+                id: autoConnectSwitch
+                checked: Model.settingEnabled(nord.vpnSettings["auto-connect"])
+                busy: nord.settingsBusy
+                interactive: !nord.unavailable
+                foreground: root.foreground
+                onToggled: nord.setSetting("autoconnect", checked ? "off" : "on")
+              }
+            }
+            SearchableDropdown {
+              id: autoConnectCountryPicker
+              width: parent.width
+              showLabel: false
+              placeholderText: "Auto-connect country (optional)..."
+              fontFamily: root.fontFamily
+              options: nord.countries
+              value: nord.autoConnectCountry
+              onChanged: function(v) {
+                nord.autoConnectCountry = v
+                if (Model.settingEnabled(nord.vpnSettings["auto-connect"]))
+                  nord.setSetting("autoconnect", "on")
+              }
+            }
+            Text {
+              width: parent.width
+              text: nord.autoConnectCountry === ""
+                ? "No country selected: NordVPN will automatically choose the fastest available server in any location when connecting."
+                : "Country selected: NordVPN will use this country for auto-connect."
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              wrapMode: Text.WordWrap
+            }
+          }
+
           Item {
             width: parent.width
             implicitHeight: settingsFlow.implicitHeight
@@ -230,7 +282,6 @@ Panel {
               model: [
               { key: "firewall", label: "Firewall", command: "firewall" },
               { key: "kill-switch", label: "Kill Switch", command: "killswitch" },
-              { key: "auto-connect", label: "Auto-connect", command: "autoconnect" },
               { key: "threat-protection-lite", label: "Threat Protection Lite", command: "threatprotectionlite" },
               { key: "notify", label: "Notify", command: "notify" },
               { key: "tray", label: "Tray", command: "tray" },
@@ -265,21 +316,6 @@ Panel {
                   interactive: !nord.unavailable
                   foreground: root.foreground
                   onToggled: nord.setSetting(modelData.command, checked ? "off" : "on")
-                }
-              }
-              SearchableDropdown {
-                id: autoConnectCountryPicker
-                visible: modelData.key === "auto-connect"
-                width: parent.width
-                showLabel: false
-                placeholderText: "Auto-connect country (optional)..."
-                fontFamily: root.fontFamily
-                options: nord.countries
-                value: nord.autoConnectCountry
-                onChanged: function(v) {
-                  nord.autoConnectCountry = v
-                  if (Model.settingEnabled(nord.vpnSettings["auto-connect"]))
-                    nord.setSetting("autoconnect", "on")
                 }
               }
             }
