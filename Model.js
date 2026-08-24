@@ -56,6 +56,7 @@ function autoConnectTarget(value) {
   if (/^[a-z]{2}(?:[0-9]+)?$/i.test(target)) return target.toLowerCase()
   var codes = {
     "argentina": "ar", "australia": "au", "austria": "at", "belgium": "be",
+    "botswana": "bw",
     "brazil": "br", "bulgaria": "bg", "canada": "ca", "chile": "cl",
     "colombia": "co", "costa rica": "cr", "croatia": "hr", "cyprus": "cy",
     "czech republic": "cz", "denmark": "dk", "estonia": "ee", "finland": "fi",

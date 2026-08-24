@@ -7,7 +7,10 @@ import "Model.js" as Model
 Item {
   id: root
   property var settings: ({})
-  property string autoConnectCountry: String(setting("autoConnectCountry", "")).trim().toLowerCase()
+  // Keep the display value as entered by the country picker. The value can
+  // still be a two-letter code, and Model.autoConnectTarget() normalizes it
+  // when building the NordVPN command.
+  property string autoConnectCountry: String(setting("autoConnectCountry", "")).trim()
   property string connectionState: "Unknown"
   property string country: ""
   property string server: ""
@@ -28,6 +31,7 @@ Item {
   property bool _statusInitialized: false
   property bool _suppressNextStatusAnnouncement: false
   property bool _settingsInitialized: false
+  property string _syncedAutoConnectCountry: ""
   property string _lastAnnouncedState: ""
   property string _lastAnnouncedCountry: ""
   property string _lastAnnouncedServer: ""
@@ -148,13 +152,27 @@ Item {
     var argument = String(value || "")
     if (name === "pq") name = "post-quantum"
     if (name === "lan-discovery") argument = argument === "on" ? "enable" : "disable"
-    else if (argument === "on") argument = "enabled"
-    else if (argument === "off") argument = "disabled"
+    // NordVPN's autoconnect command uses the CLI values `on`/`off`.
+    // Other settings use `enabled`/`disabled` in the installed client.
+    // Converting autoconnect to `enabled` drops the optional country target
+    // on some client versions, so keep its command syntax intact.
+    else if (name !== "autoconnect" && argument === "on") argument = "enabled"
+    else if (name !== "autoconnect" && argument === "off") argument = "disabled"
     if (name === "tray") vpnSettings["tray"] = argument
     setSettingProcess.command = ["nordvpn", "set", name, argument]
-    if (name === "autoconnect" && argument === "enabled" && root.autoConnectCountry !== "")
+    if (name === "autoconnect" && (argument === "on" || argument === "enabled") && root.autoConnectCountry !== "") {
+      root._syncedAutoConnectCountry = root.autoConnectCountry
       setSettingProcess.command.push(Model.autoConnectTarget(root.autoConnectCountry))
+    }
     setSettingProcess.running = true
+  }
+
+  function syncAutoConnectCountry() {
+    var configured = root.autoConnectCountry
+    if (!Model.settingEnabled(root.vpnSettings["auto-connect"]) || configured === "") return
+    if (configured === root._syncedAutoConnectCountry || setSettingProcess.running) return
+    root._syncedAutoConnectCountry = configured
+    root.setSetting("autoconnect", "on")
   }
 
   Timer {
@@ -265,6 +283,7 @@ Item {
         root.vpnSettings = Model.parseSettings(settingsStdout.text || "")
         root.settingsError = ""
         root._settingsInitialized = true
+        root.syncAutoConnectCountry()
       } else {
         root.settingsError = "NordVPN settings unavailable"
         root._settingsInitialized = false

@@ -19,10 +19,22 @@ Panel {
   readonly property color barIconColor: nord.unavailable ? Qt.darker(barForeground, 1.2) : (nord.active ? barForeground : Qt.darker(barForeground, 1.55))
   readonly property string toggleHint: nord.active ? "Disconnect" : "Connect"
   readonly property bool paused: nord.pauseRemainingSec > 0
+  readonly property string tooltipCountry: nord.country !== "" ? " (" + nord.country + ")" : ""
+  property bool updatingCountryPicker: false
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
   Service { id: nord; settings: root.settings }
+
+  // Plugin settings live in shell.json. Persist through the shell owner so
+  // the selected country survives a shell restart or system reboot.
+  function persistSetting(key, value) {
+    if (!root.bar || !root.bar.shell || typeof root.bar.shell.updateEntryInline !== "function") return
+    var entry = { id: root.moduleName }
+    for (var existing in root.settings) if (existing !== "id") entry[existing] = root.settings[existing]
+    entry[key] = value
+    root.bar.shell.updateEntryInline(root.moduleName, entry)
+  }
 
   onOpenedChanged: if (opened) {
     nord.refresh()
@@ -32,11 +44,30 @@ Panel {
 
   Connections {
     target: nord
+    function updateBarTooltip() {
+      if (root.bar && button.tooltipHovered)
+        root.bar.showTooltip(button, button.tooltipText)
+    }
     function onConnectionStateChanged() {
       if (nord.connected) {
         pausePicker.value = ""
         nord.clearPauseCountdown()
       }
+      updateBarTooltip()
+    }
+    function onAutoConnectCountryChanged() {
+      autoConnectCountryPicker.value = nord.autoConnectCountry
+    }
+    function onCountryChanged() {
+      if (countryPicker.value !== nord.country) {
+        // `country` is the live VPN status, not the user's auto-connect
+        // preference. Updating the first picker must never be interpreted as
+        // a new user selection and sent back to nordvpn connect.
+        root.updatingCountryPicker = true
+        countryPicker.value = nord.country
+        root.updatingCountryPicker = false
+      }
+      updateBarTooltip()
     }
   }
 
@@ -58,8 +89,8 @@ Panel {
     text: "󰦝"
     foreground: root.barIconColor
     tooltipText: root.paused
-      ? "NordVPN " + String.fromCodePoint(0x2014) + " Paused (" + nord.pauseCountdownText + ")"
-      : "NordVPN " + String.fromCodePoint(0x2014) + " " + nord.statusText
+      ? "NordVPN " + String.fromCodePoint(0x2014) + " Paused (" + nord.pauseCountdownText + ")" + root.tooltipCountry
+      : "NordVPN " + String.fromCodePoint(0x2014) + " " + nord.statusText + root.tooltipCountry
     onPressed: function(buttonCode) {
       if (buttonCode === Qt.RightButton) nord.refresh()
       else if (buttonCode === Qt.MiddleButton) nord.toggle()
@@ -166,7 +197,9 @@ Panel {
             fontFamily: root.fontFamily
             options: nord.countries
             value: nord.country
-            onChanged: function(v) { nord.setCountry(v) }
+            onChanged: function(v) {
+              if (!root.updatingCountryPicker) nord.setCountry(v)
+            }
           }
         }
 
@@ -265,6 +298,7 @@ Panel {
               value: nord.autoConnectCountry
               onChanged: function(v) {
                 nord.autoConnectCountry = v
+                root.persistSetting("autoConnectCountry", v)
                 if (Model.settingEnabled(nord.vpnSettings["auto-connect"]))
                   nord.setSetting("autoconnect", "on")
               }
