@@ -284,6 +284,7 @@ Panel {
               }
             }
             }
+            }
 
             Rectangle {
               anchors.top: parent.top
