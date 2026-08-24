@@ -73,7 +73,7 @@ Item {
       'mkdir "$base" 2>/dev/null || [ -d "$base" ] || exit 0',
       'lock="$base.lockdir"',
       'mkdir "$lock" 2>/dev/null || exit 0',
-      'trap '\''rmdir -- "$lock" 2>/dev/null'\'' EXIT',
+      "trap 'rmdir -- \"$lock\" 2>/dev/null' EXIT",
       'state="$base.state"',
       'now=$(date +%s)',
       'key=$(printf "%s" "$1|$2" | sha256sum | cut -d" " -f1)',
@@ -83,7 +83,7 @@ Item {
       'case "$previousTime" in ""|*[!0-9]*) previousTime=-1;; esac',
       'if [ "$previousKey" = "$key" ] && [ $((now - previousTime)) -lt 10 ]; then exit 0; fi',
       'tmp=$(mktemp "$base.state.XXXXXX") || exit 0',
-      'trap '\''rm -f -- "$tmp"; rmdir -- "$lock" 2>/dev/null'\'' EXIT',
+      "trap 'rm -f -- \"$tmp\"; rmdir -- \"$lock\" 2>/dev/null' EXIT",
       'printf "%s %s\\n" "$key" "$now" > "$tmp" || exit 0',
       'mv -f -- "$tmp" "$state" || exit 0',
       'omarchy-notification-send -g "󰦝" "$1" "$2"'
