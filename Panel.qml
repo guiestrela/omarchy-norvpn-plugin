@@ -218,6 +218,32 @@ Panel {
             onChanged: function(v) { nord.setSetting("technology", v) }
           }
 
+          TextField {
+            id: autoConnectCountryField
+            width: parent.width
+            foreground: root.foreground
+            font.family: root.fontFamily
+            placeholderText: "Country code (optional, e.g. br or fr)"
+            text: nord.autoConnectCountry
+            function commitCountry() {
+              var value = text.trim().toLowerCase()
+              if (/^[a-z]{2}(?:[0-9]+)?$/.test(value) || value === "")
+                nord.autoConnectCountry = value
+              else
+                text = nord.autoConnectCountry
+            }
+            onAccepted: commitCountry()
+            onEditingFinished: commitCountry()
+          }
+          Text {
+            width: parent.width
+            text: "Auto-connect uses this country code when enabled. Leave empty for the fastest server."
+            color: root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            wrapMode: Text.WordWrap
+          }
+
           Item {
             width: parent.width
             implicitHeight: settingsFlow.implicitHeight

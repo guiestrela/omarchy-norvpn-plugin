@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.guiestrela.nordvpn",
   "name": "NordVPN",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Guiestrela",
   "license": "MIT",
-  "description": "Connect/disconnect NordVPN and pick a country from the Omarchy bar.",
+  "description": "Connect/disconnect NordVPN, pick a country, and configure auto-connect.",
   "kinds": ["bar-widget"],
   "entryPoints": { "barWidget": "Panel.qml" },
   "barWidget": {
@@ -14,7 +14,7 @@
     "category": "Network",
     "allowMultiple": false,
     "defaultSection": "right",
-    "defaults": { "refreshIntervalSec": 5 },
+    "defaults": { "refreshIntervalSec": 5, "autoConnectCountry": "" },
     "schema": [
       {
         "key": "refreshIntervalSec",
@@ -24,6 +24,13 @@
         "max": 60,
         "step": 1,
         "defaultValue": 5
+      },
+      {
+        "key": "autoConnectCountry",
+        "type": "string",
+        "label": "Auto-connect country code",
+        "description": "Optional two-letter country code, such as br or fr.",
+        "defaultValue": ""
       }
     ]
   }

@@ -7,6 +7,7 @@ import "Model.js" as Model
 Item {
   id: root
   property var settings: ({})
+  property string autoConnectCountry: String(setting("autoConnectCountry", "")).trim().toLowerCase()
   property string connectionState: "Unknown"
   property string country: ""
   property string server: ""
@@ -151,6 +152,8 @@ Item {
     else if (argument === "off") argument = "disabled"
     if (name === "tray") vpnSettings["tray"] = argument
     setSettingProcess.command = ["nordvpn", "set", name, argument]
+    if (name === "autoconnect" && argument === "enabled" && root.autoConnectCountry !== "")
+      setSettingProcess.command.push(root.autoConnectCountry)
     setSettingProcess.running = true
   }
 

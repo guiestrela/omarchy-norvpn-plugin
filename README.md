@@ -48,6 +48,11 @@ omarchy plugin disable io.github.guiestrela.nordvpn
 - Middle-click: connect or disconnect.
 - In the popup, the switch performs a quick connect or disconnect.
 - The country selector searches countries and runs `nordvpn connect <country>`.
+- Auto-connect can target a specific country by setting `autoConnectCountry` to
+  its two-letter NordVPN country code (for example, `br` or `fr`). When the
+  field is empty, NordVPN chooses the fastest available server. The plugin
+  applies this as `nordvpn set autoconnect on <country_code>` when Auto-connect
+  is enabled.
 - The Pause selector pauses the VPN immediately when you choose 5m, 15m, 30m, 1h, or 24h using `nordvpn pause`. A countdown is shown beside the selector, which then returns to its placeholder.
 
 The icon is bright when connected, dimmed when disconnected, and shown in the
@@ -77,6 +82,8 @@ values. They must be checked or managed through the NordVPN terminal/CLI when
 supported by the installed client version.
 
 - `refreshIntervalSec` (2–60, default 5): connection status refresh interval.
+- `autoConnectCountry` (default empty): optional two-letter country code used
+  by Auto-connect, such as `br` or `fr`.
 
 ## Uninstall
 
