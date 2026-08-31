@@ -412,16 +412,6 @@ Panel {
             width: parent.width
             spacing: Style.space(8)
             PanelSectionHeader { text: "SECURITY"; foreground: root.foreground; fontFamily: root.fontFamily }
-            Text {
-              width: parent.width
-              text: "Firewall: " + (nord.vpnSettings["firewall"] || "Checking…")
-                + "  •  Kill switch: " + (nord.vpnSettings["kill-switch"] || "Checking…")
-                + "  •  Threat protection: " + (nord.vpnSettings["threat-protection-lite"] || "Checking…")
-              color: root.foreground
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.bodySmall
-              wrapMode: Text.WordWrap
-            }
             Flow {
               width: parent.width
               spacing: Style.space(8)
