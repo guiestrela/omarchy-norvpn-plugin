@@ -31,6 +31,7 @@ Item {
   property bool _statusInitialized: false
   property bool _suppressNextStatusAnnouncement: false
   property bool _settingsInitialized: false
+  property bool _settingsRefreshPending: false
   property string _syncedAutoConnectCountry: ""
   property string _lastAnnouncedState: ""
   property string _lastAnnouncedCountry: ""
@@ -62,7 +63,11 @@ Item {
     if (!countriesLoaded && !countriesProcess.running) countriesProcess.running = true
   }
   function refreshSettings() {
-    if (!settingsProcess.running) settingsProcess.running = true
+    if (settingsProcess.running) {
+      _settingsRefreshPending = true
+      return
+    }
+    settingsProcess.running = true
   }
   function announce(headline, description, allowWithTray) {
     if (!headline || !root._settingsInitialized || (Model.settingEnabled(root.vpnSettings["tray"]) && !allowWithTray)) return
@@ -317,6 +322,10 @@ Item {
         root._settingsInitialized = false
         root.actionStatus = root.settingsError
         actionStatusTimer.restart()
+      }
+      if (root._settingsRefreshPending) {
+        root._settingsRefreshPending = false
+        Qt.callLater(function() { root.refreshSettings() })
       }
     }
   }
