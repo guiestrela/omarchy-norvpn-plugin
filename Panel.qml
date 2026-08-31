@@ -59,8 +59,8 @@ Panel {
       autoConnectCountryPicker.value = nord.autoConnectCountry
     }
     function onVpnSettingsChanged() {
-      technologyPicker.value = nord.vpnSettings["technology"] || ""
-      protocolPicker.value = nord.vpnSettings["protocol"] || ""
+      technologyPicker.value = Model.selectedOptionValue(nord.vpnSettings["technology"], technologyPicker.options)
+      protocolPicker.value = Model.selectedOptionValue(nord.vpnSettings["protocol"], protocolPicker.options)
     }
     function onCountryChanged() {
       if (countryPicker.value !== nord.country) {
@@ -261,7 +261,7 @@ Panel {
               { value: "NORDLYNX", label: "NordLynx" },
               { value: "OPENVPN", label: "OpenVPN" }
             ]
-            value: nord.vpnSettings["technology"] || ""
+            value: Model.selectedOptionValue(nord.vpnSettings["technology"], options)
             onChanged: function(v) { nord.setSetting("technology", v) }
           }
 
@@ -276,7 +276,7 @@ Panel {
               { value: "UDP", label: "UDP (faster)" },
               { value: "TCP", label: "TCP (more reliable)" }
             ]
-            value: nord.vpnSettings["protocol"] || ""
+            value: Model.selectedOptionValue(nord.vpnSettings["protocol"], options)
             onChanged: function(v) { nord.setSetting("protocol", v) }
           }
 

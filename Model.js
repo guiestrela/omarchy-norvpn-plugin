@@ -51,6 +51,17 @@ function settingEnabled(value) {
   return /^(enabled|on|yes|true)$/i.test(String(value || "").trim())
 }
 
+function selectedOptionValue(value, options) {
+  var raw = String(value || "").trim()
+  var normalized = raw.toLowerCase().replace(/\s*\(.+\)$/, "")
+  for (var i = 0; i < options.length; i++) {
+    var option = options[i]
+    var optionValue = typeof option === "object" ? String(option.value) : String(option)
+    if (optionValue.toLowerCase() === normalized) return optionValue
+  }
+  return raw
+}
+
 function autoConnectTarget(value) {
   var target = String(value || "").trim()
   if (/^[a-z]{2}(?:[0-9]+)?$/i.test(target)) return target.toLowerCase()
