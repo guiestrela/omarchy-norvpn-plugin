@@ -87,10 +87,6 @@ for quick review and changes. Enable Kill Switch and Firewall when you need
 traffic protection during connection drops; availability depends on the
 installed NordVPN client version.
 
-`Firewall Mark` and `User Consent` are displayed as read-only daemon status
-values. They must be checked or managed through the NordVPN terminal/CLI when
-supported by the installed client version.
-
 - `refreshIntervalSec` (2–60, default 5): connection status refresh interval.
 - `autoConnectCountry` (default empty): optional two-letter country code used
   by Auto-connect, such as `br` or `fr`.

@@ -452,30 +452,6 @@ Panel {
           }
 
           PanelSeparator { foreground: root.foreground }
-          Text {
-            width: parent.width
-            text: "Editable options use NordVPN set commands. Firewall Mark and User Consent are daemon status values and are read-only here. Manage them through the NordVPN terminal/CLI when supported."
-            color: root.dim
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.bodySmall
-            wrapMode: Text.WordWrap
-          }
-          Text {
-            width: parent.width
-            text: "- Firewall Mark: " + (nord.vpnSettings["firewall-mark"] || "Checking…")
-            color: root.dim
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.bodySmall
-            wrapMode: Text.WordWrap
-          }
-          Text {
-            width: parent.width
-            text: "- User Consent: " + (nord.vpnSettings["user-consent"] || "Checking…")
-            color: root.dim
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.bodySmall
-            wrapMode: Text.WordWrap
-          }
           Item {
             width: 1
             height: Style.space(18)
