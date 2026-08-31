@@ -59,8 +59,10 @@ Panel {
       autoConnectCountryPicker.value = nord.autoConnectCountry
     }
     function onVpnSettingsChanged() {
-      technologyPicker.value = Model.selectedOptionValue(nord.vpnSettings["technology"], technologyPicker.options)
-      protocolPicker.value = Model.selectedOptionValue(nord.vpnSettings["protocol"], protocolPicker.options)
+      var technology = Model.selectedOptionValue(nord.vpnSettings["technology"], technologyPicker.options)
+      var protocol = Model.selectedOptionValue(nord.vpnSettings["protocol"], protocolPicker.options)
+      if (technology !== "") technologyPicker.value = technology
+      if (protocol !== "") protocolPicker.value = protocol
     }
     function onCountryChanged() {
       if (countryPicker.value !== nord.country) {
