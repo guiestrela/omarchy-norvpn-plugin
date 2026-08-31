@@ -389,6 +389,8 @@ Panel {
                   checked: Model.settingEnabled(nord.vpnSettings[modelData.key])
                   busy: nord.settingsBusy
                   interactive: !nord.unavailable
+                    && !(modelData.key === "routing"
+                         && Model.settingEnabled(nord.vpnSettings["meshnet"]))
                   foreground: root.foreground
                   onToggled: nord.setSetting(modelData.command, checked ? "off" : "on")
                 }
