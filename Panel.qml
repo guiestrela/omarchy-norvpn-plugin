@@ -21,6 +21,7 @@ Panel {
   readonly property bool paused: nord.pauseRemainingSec > 0
   readonly property string tooltipCountry: nord.country !== "" ? " (" + nord.country + ")" : ""
   property bool updatingCountryPicker: false
+  property string selectedProtocol: String(setting("protocol", ""))
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
@@ -62,7 +63,12 @@ Panel {
       var technology = Model.selectedOptionValue(nord.vpnSettings["technology"], technologyPicker.options)
       var protocol = Model.selectedOptionValue(nord.vpnSettings["protocol"], protocolPicker.options)
       if (technology !== "") technologyPicker.value = technology
-      if (protocol !== "") protocolPicker.value = protocol
+      if (protocol !== "") {
+        root.selectedProtocol = protocol
+        protocolPicker.value = protocol
+      } else if (root.selectedProtocol !== "") {
+        protocolPicker.value = root.selectedProtocol
+      }
     }
     function onCountryChanged() {
       if (countryPicker.value !== nord.country) {
@@ -278,8 +284,14 @@ Panel {
               { value: "UDP", label: "UDP (faster)" },
               { value: "TCP", label: "TCP (more reliable)" }
             ]
-            value: Model.selectedOptionValue(nord.vpnSettings["protocol"], options)
-            onChanged: function(v) { nord.setSetting("protocol", v) }
+            value: root.selectedProtocol !== ""
+              ? root.selectedProtocol
+              : Model.selectedOptionValue(nord.vpnSettings["protocol"], options)
+            onChanged: function(v) {
+              root.selectedProtocol = v
+              root.persistSetting("protocol", v)
+              nord.setSetting("protocol", v)
+            }
           }
 
           PanelSeparator { foreground: root.foreground }
