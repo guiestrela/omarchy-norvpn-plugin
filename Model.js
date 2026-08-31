@@ -72,7 +72,18 @@ function autoConnectTarget(value) {
     "turkey": "tr", "ukraine": "ua", "united arab emirates": "ae",
     "united kingdom": "uk", "united states": "us", "vietnam": "vn"
   }
-  return codes[target.toLowerCase()] || target
+  // Configuration can be edited outside the picker. Never pass an arbitrary
+  // value as a country target; Process receives argv safely, but rejecting
+  // unknown values also prevents accidental invalid NordVPN commands.
+  if (codes[target.toLowerCase()]) return codes[target.toLowerCase()]
+  if (/^[a-z]{2}(?:[0-9]+)?$/i.test(target)) return target.toLowerCase()
+  // Country names returned by `nordvpn countries` may vary by client version.
+  // Permit only plain human-readable names as a safe argv value.
+  return /^[a-z][a-z .'-]{1,63}$/i.test(target) ? target : ""
+}
+
+function validPauseDuration(value) {
+  return /^(5m|15m|30m|1h|24h)$/.test(String(value || ""))
 }
 
 function statusText(state) {

@@ -14,7 +14,7 @@ Panel {
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property color urgent: bar ? bar.urgent : Color.urgent
   readonly property color dim: Qt.darker(foreground, 1.55)
-  readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
+  readonly property string fontFamily: (bar && bar.fontFamily) ? bar.fontFamily : Style.font.family
   readonly property color iconColor: nord.unavailable ? urgent : (nord.active ? foreground : dim)
   readonly property color barIconColor: nord.unavailable ? Qt.darker(barForeground, 1.2) : (nord.active ? barForeground : Qt.darker(barForeground, 1.55))
   readonly property string toggleHint: nord.active ? "Disconnect" : "Connect"
@@ -262,6 +262,21 @@ Panel {
             onChanged: function(v) { nord.setSetting("technology", v) }
           }
 
+          SearchableDropdown {
+            id: protocolPicker
+            width: parent.width
+            showLabel: true
+            label: "Protocol"
+            placeholderText: "Select protocol..."
+            fontFamily: root.fontFamily
+            options: [
+              { value: "UDP", label: "UDP (faster)" },
+              { value: "TCP", label: "TCP (more reliable)" }
+            ]
+            value: nord.vpnSettings["protocol"] || ""
+            onChanged: function(v) { nord.setSetting("protocol", v) }
+          }
+
           PanelSeparator { foreground: root.foreground }
           Column {
             width: parent.width
@@ -325,9 +340,6 @@ Panel {
             spacing: Style.space(8)
             Repeater {
               model: [
-              { key: "firewall", label: "Firewall", command: "firewall" },
-              { key: "kill-switch", label: "Kill Switch", command: "killswitch" },
-              { key: "threat-protection-lite", label: "Threat Protection Lite", command: "threatprotectionlite" },
               { key: "notify", label: "Notify", command: "notify" },
               { key: "tray", label: "Tray", command: "tray" },
               { key: "meshnet", label: "Meshnet", command: "meshnet" },
@@ -374,6 +386,58 @@ Panel {
               width: 1
               color: root.dim
               opacity: 0.55
+            }
+          }
+
+          PanelSeparator { foreground: root.foreground }
+          Column {
+            width: parent.width
+            spacing: Style.space(8)
+            PanelSectionHeader { text: "SECURITY"; foreground: root.foreground; fontFamily: root.fontFamily }
+            Text {
+              width: parent.width
+              text: "Firewall: " + (nord.vpnSettings["firewall"] || "Checking…")
+                + "  •  Kill switch: " + (nord.vpnSettings["kill-switch"] || "Checking…")
+                + "  •  Threat protection: " + (nord.vpnSettings["threat-protection-lite"] || "Checking…")
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              wrapMode: Text.WordWrap
+            }
+            Flow {
+              width: parent.width
+              spacing: Style.space(8)
+              Repeater {
+                model: [
+                  { key: "firewall", label: "Firewall", command: "firewall" },
+                  { key: "kill-switch", label: "Kill Switch", command: "killswitch" },
+                  { key: "threat-protection-lite", label: "Threat Protection Lite", command: "threatprotectionlite" }
+                ]
+                delegate: Column {
+                  width: (parent.width - Style.space(8)) / 2
+                  spacing: Style.space(8)
+                  Row {
+                    width: parent.width
+                    spacing: Style.space(8)
+                    Text {
+                      width: parent.width - securitySwitch.width - Style.space(8)
+                      text: modelData.label
+                      color: root.foreground
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.bodySmall
+                      wrapMode: Text.WordWrap
+                    }
+                    ToggleSwitch {
+                      id: securitySwitch
+                      checked: Model.settingEnabled(nord.vpnSettings[modelData.key])
+                      busy: nord.settingsBusy
+                      interactive: !nord.unavailable
+                      foreground: root.foreground
+                      onToggled: nord.setSetting(modelData.command, checked ? "off" : "on")
+                    }
+                  }
+                }
+              }
             }
           }
 

@@ -147,7 +147,7 @@ Item {
     _pauseDuration = ""
   }
   function pause(duration) {
-    if (!duration || pauseProcess.running) return
+    if (!Model.validPauseDuration(duration) || pauseProcess.running) return
     _pauseDuration = duration
     pauseProcess.command = ["nordvpn", "pause", duration]
     pauseProcess.running = true
@@ -160,7 +160,12 @@ Item {
   }
   function setSetting(name, value) {
     if (!name || setSettingProcess.running) return
+    var allowed = ["technology", "protocol", "firewall", "killswitch", "threatprotectionlite",
+      "notify", "tray", "meshnet", "dns", "lan-discovery", "routing", "virtual-location",
+      "arp-ignore", "pq", "autoconnect"]
+    if (allowed.indexOf(String(name)) < 0) return
     var argument = String(value || "")
+    if (!/^(on|off|enabled|disabled|enable|disable|NORDLYNX|OPENVPN|UDP|TCP)$/i.test(argument)) return
     if (name === "pq") name = "post-quantum"
     if (name === "lan-discovery") argument = argument === "on" ? "enable" : "disable"
     // NordVPN's autoconnect command uses the CLI values `on`/`off`.
@@ -182,6 +187,7 @@ Item {
     var configured = root.autoConnectCountry
     if (!Model.settingEnabled(root.vpnSettings["auto-connect"]) || configured === "") return
     if (configured === root._syncedAutoConnectCountry || setSettingProcess.running) return
+    if (Model.autoConnectTarget(configured) === "") return
     root._syncedAutoConnectCountry = configured
     root.setSetting("autoconnect", "on")
   }

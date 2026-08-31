@@ -18,8 +18,10 @@ searchable country selector.
   ```
 
 The plugin uses the official NordVPN CLI commands `status`, `settings`,
-`countries`, `connect`, `disconnect`, and the supported `set` options. It does
-not access NordVPN credentials or modify NordVPN configuration files directly.
+`countries`, `connect`, `disconnect`, `pause`, and supported `set` options. It
+does not access NordVPN credentials or modify NordVPN configuration files
+directly. Actions are passed as argument arrays to Quickshell processes; user
+input is not interpolated into a shell command.
 
 ## Installation
 
@@ -48,6 +50,8 @@ omarchy plugin disable io.github.guiestrela.nordvpn
 - Middle-click: connect or disconnect.
 - In the popup, the switch performs a quick connect or disconnect.
 - The country selector searches countries and runs `nordvpn connect <country>`.
+- The Protocol selector switches between UDP and TCP through
+  `nordvpn set protocol`.
 - Auto-connect can target a specific country by choosing it in the country list
   shown below Auto-connect, or by setting `autoConnectCountry` to its two-letter
   NordVPN country code (for example, `br` or `fr`). When the
@@ -78,6 +82,11 @@ two-column layout. The following settings can be changed through the official
 - ARP Ignore
 - Post-quantum VPN
 
+The Security section groups Firewall, Kill Switch, and Threat Protection Lite
+for quick review and changes. Enable Kill Switch and Firewall when you need
+traffic protection during connection drops; availability depends on the
+installed NordVPN client version.
+
 `Firewall Mark` and `User Consent` are displayed as read-only daemon status
 values. They must be checked or managed through the NordVPN terminal/CLI when
 supported by the installed client version.
@@ -85,6 +94,13 @@ supported by the installed client version.
 - `refreshIntervalSec` (2–60, default 5): connection status refresh interval.
 - `autoConnectCountry` (default empty): optional two-letter country code used
   by Auto-connect, such as `br` or `fr`.
+
+## Theme and fonts
+
+The widget does not ship its own colors or font files. It follows the active
+Omarchy bar theme (`foreground`, `urgent`, and theme spacing) and uses the bar
+font, including Nerd Font icons. Change these globally with `omarchy theme set
+<name>` and `omarchy font set <name>`; the widget updates with the shell.
 
 ## Uninstall
 
