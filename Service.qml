@@ -205,7 +205,10 @@ Item {
     repeat: true
     running: true
     triggeredOnStart: true
-    onTriggered: root.refresh()
+    onTriggered: {
+      root.refresh()
+      root.refreshSettings()
+    }
   }
 
   Component.onCompleted: root.refreshSettings()
