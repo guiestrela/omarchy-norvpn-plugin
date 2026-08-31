@@ -70,11 +70,6 @@ Panel {
       } else if (root.selectedProtocol !== "") {
         protocolPicker.value = root.selectedProtocol
       }
-      for (var i = 0; i < securityRepeater.count; i++) {
-        var securityDelegate = securityRepeater.itemAt(i)
-        if (securityDelegate)
-          securityDelegate.switchControl.checked = Model.settingEnabled(nord.vpnSettings[securityDelegate.settingKey])
-      }
     }
     function onCountryChanged() {
       if (countryPicker.value !== nord.country) {
@@ -421,16 +416,12 @@ Panel {
               width: parent.width
               spacing: Style.space(8)
               Repeater {
-                id: securityRepeater
                 model: [
                   { key: "firewall", label: "Firewall", command: "firewall" },
                   { key: "kill-switch", label: "Kill Switch", command: "killswitch" },
                   { key: "threat-protection-lite", label: "Threat Protection Lite", command: "threatprotectionlite" }
                 ]
                 delegate: Column {
-                  required property var modelData
-                  readonly property string settingKey: modelData.key
-                  property alias switchControl: securitySwitch
                   width: (parent.width - Style.space(8)) / 2
                   spacing: Style.space(8)
                   Row {
