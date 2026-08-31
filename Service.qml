@@ -174,6 +174,14 @@ Item {
     // on some client versions, so keep its command syntax intact.
     else if (name !== "autoconnect" && argument === "on") argument = "enabled"
     else if (name !== "autoconnect" && argument === "off") argument = "disabled"
+    var settingKey = name === "autoconnect" ? "auto-connect"
+      : name === "killswitch" ? "kill-switch"
+      : name === "threatprotectionlite" ? "threat-protection-lite"
+      : name === "post-quantum" ? "post-quantum-vpn"
+      : name
+    var optimisticSettings = Object.assign({}, root.vpnSettings)
+    optimisticSettings[settingKey] = argument
+    root.vpnSettings = optimisticSettings
     if (name === "tray") vpnSettings["tray"] = argument
     setSettingProcess.command = ["nordvpn", "set", name, argument]
     if (name === "autoconnect" && (argument === "on" || argument === "enabled") && root.autoConnectCountry !== "") {

@@ -429,7 +429,7 @@ Panel {
                     spacing: Style.space(8)
                     Text {
                       width: parent.width - securitySwitch.width - Style.space(8)
-                      text: modelData.label
+                      text: modelData.label + ": " + (nord.vpnSettings[modelData.key] || "Checking…")
                       color: root.foreground
                       font.family: root.fontFamily
                       font.pixelSize: Style.font.bodySmall
