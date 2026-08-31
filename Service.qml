@@ -174,18 +174,16 @@ Item {
     if (name === "pq") name = "post-quantum"
     if (name === "lan-discovery") argument = argument === "on" ? "enable" : "disable"
     // NordVPN's autoconnect command uses the CLI values `on`/`off`.
-    // Other settings use `enabled`/`disabled` in the installed client.
-    // Converting autoconnect to `enabled` drops the optional country target
-    // on some client versions, so keep its command syntax intact.
-    else if (name !== "autoconnect" && argument === "on") argument = "enabled"
-    else if (name !== "autoconnect" && argument === "off") argument = "disabled"
+    // The settings output uses `enabled`/`disabled`, but set commands use
+    // `on`/`off` for switches such as firewall and kill switch.
     var settingKey = name === "autoconnect" ? "auto-connect"
       : name === "killswitch" ? "kill-switch"
       : name === "threatprotectionlite" ? "threat-protection-lite"
       : name === "post-quantum" ? "post-quantum-vpn"
       : name
     var optimisticSettings = Object.assign({}, root.vpnSettings)
-    optimisticSettings[settingKey] = argument
+    optimisticSettings[settingKey] = argument === "on" ? "enabled"
+      : argument === "off" ? "disabled" : argument
     root.vpnSettings = optimisticSettings
     if (name === "tray") vpnSettings["tray"] = argument
     setSettingProcess.command = ["nordvpn", "set", name, argument]
