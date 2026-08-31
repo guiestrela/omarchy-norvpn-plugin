@@ -34,6 +34,7 @@ Panel {
     var entry = { id: root.moduleName }
     for (var existing in root.settings) if (existing !== "id") entry[existing] = root.settings[existing]
     entry[key] = value
+    root.settings = entry
     root.bar.shell.updateEntryInline(root.moduleName, entry)
   }
 

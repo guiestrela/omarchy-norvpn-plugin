@@ -14,7 +14,7 @@
     "category": "Network",
     "allowMultiple": false,
     "defaultSection": "right",
-    "defaults": { "refreshIntervalSec": 5, "autoConnectCountry": "" },
+    "defaults": { "refreshIntervalSec": 5, "autoConnectCountry": "", "protocol": "UDP" },
     "schema": [
       {
         "key": "refreshIntervalSec",
