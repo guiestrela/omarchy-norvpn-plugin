@@ -451,7 +451,6 @@ Panel {
             }
           }
 
-          PanelSeparator { foreground: root.foreground }
           Item {
             width: 1
             height: Style.space(18)
