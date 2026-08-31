@@ -58,6 +58,10 @@ Panel {
     function onAutoConnectCountryChanged() {
       autoConnectCountryPicker.value = nord.autoConnectCountry
     }
+    function onVpnSettingsChanged() {
+      technologyPicker.value = nord.vpnSettings["technology"] || ""
+      protocolPicker.value = nord.vpnSettings["protocol"] || ""
+    }
     function onCountryChanged() {
       if (countryPicker.value !== nord.country) {
         // `country` is the live VPN status, not the user's auto-connect
