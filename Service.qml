@@ -72,6 +72,10 @@ Item {
   function announce(headline, description, allowWithTray) {
     if (!headline || !root._settingsInitialized || (Model.settingEnabled(root.vpnSettings["tray"]) && !allowWithTray)) return
     var script = [
+      // Shutdown stops nordvpnd before the shell exits. A notification sent
+      // then lands in the notification history and greets the next login as
+      // a bogus "daemon could not be reached" error.
+      'case "$(systemctl is-system-running 2>/dev/null)" in stopping) exit 0;; esac',
       'runtime="${XDG_RUNTIME_DIR:-}"',
       '[ -n "$runtime" ] && [ -d "$runtime" ] || exit 0',
       'base="$runtime/omarchy-nordvpn-notification"',
